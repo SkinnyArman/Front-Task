@@ -7,8 +7,14 @@
       <div class="flex justify-between items-center mb-4">
         <input
           v-model="filterName"
-          class="flex h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg shadow-lg w-1/2"
-          placeholder="Filter by name, date, or ad title"
+          class="flex h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg shadow-lg w-1/3"
+          placeholder="Filter by name"
+          type="search"
+        />
+        <input
+          v-model="filterTitle"
+          class="flex h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg shadow-lg w-1/3"
+          placeholder="Filter by title"
           type="search"
         />
         <button
@@ -153,7 +159,9 @@
 import { ref, computed } from 'vue'
 import data from './data/records.json'
 
-const transactions = ref(data)
+console.log(data.slice(0, 200))
+
+const transactions = ref(data.slice(0, 200))
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 const filterName = ref('')
@@ -165,9 +173,8 @@ const sortDirection = ref('asc')
 const sortedTransactions = computed(() => {
   const filteredTransactions = transactions.value.filter((transaction) => {
     return (
-      transaction.name.includes(filterName.value) &&
-      transaction.date.includes(filterDate.value) &&
-      transaction.title.includes(filterTitle.value)
+      transaction.name.toLowerCase().includes(filterName.value.toLowerCase()) ||
+      transaction.title.toLowerCase()
     )
   })
 
