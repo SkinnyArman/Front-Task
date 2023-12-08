@@ -42,7 +42,7 @@
   </div>
 </template>
 
-<script></script>
+<script lang="ts" setup></script>
 
 <style scoped>
 svg {
