@@ -3,23 +3,25 @@
     <div class="flex flex-col space-y-1.5 p-6">
       <h3 class="text-2xl font-semibold leading-none tracking-tight">Transaction History</h3>
     </div>
-    <div class="p-6">
+    <div class="p-6" v-if="!isFetching">
       <div class="flex justify-between items-center mb-4">
         <input
-          v-model="filterName"
           class="flex h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg shadow-lg w-1/3"
           placeholder="Filter by name"
           type="search"
+          :value="paramKey('name')"
+          @keydown.enter="handleRoute('name', $event.target.value)"
         />
         <input
-          v-model="filterTitle"
           class="flex h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg shadow-lg w-1/3"
           placeholder="Filter by title"
           type="search"
+          :value="paramKey('title')"
+          @keydown.enter="handleRoute('title', $event.target.value)"
         />
         <button
           class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 ml-4"
-          @click="sortBy('date')"
+          @click="handleSort"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -81,7 +83,7 @@
           </thead>
           <tbody class="[&amp;_tr:last-child]:border-0">
             <tr
-              v-for="transaction in sortedTransactions"
+              v-for="transaction in data.data"
               :key="transaction.id"
               class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
             >
@@ -131,7 +133,7 @@
         </button>
         <button
           class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-          @click="nextPage"
+          @click="handleRoute('page', data.page + 1)"
           :disabled="currentPage === totalPages"
         >
           <svg
@@ -157,59 +159,35 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import data from './data/records.json'
+import { useFetch } from '@vueuse/core'
+import { BASE_URL } from './constants'
+import { useUrlSearchParams } from '@vueuse/core'
 
-console.log(data.slice(0, 200))
+const params = useUrlSearchParams('history')
+const query = computed(() => new URLSearchParams(params).toString())
+const url = computed(() => BASE_URL + '?' + query.value)
 
-const transactions = ref(data.slice(0, 200))
-const currentPage = ref(1)
-const itemsPerPage = ref(10)
-const filterName = ref('')
-const filterDate = ref('')
-const filterTitle = ref('')
-const sortByField = ref('')
-const sortDirection = ref('asc')
-
-const sortedTransactions = computed(() => {
-  const filteredTransactions = transactions.value.filter((transaction) => {
-    return (
-      transaction.name.toLowerCase().includes(filterName.value.toLowerCase()) ||
-      transaction.title.toLowerCase()
-    )
-  })
-
-  if (sortByField.value) {
-    return filteredTransactions.sort((a, b) => {
-      const modifier = sortDirection.value === 'asc' ? 1 : -1
-      return modifier * (a[sortByField.value] > b[sortByField.value] ? 1 : -1)
-    })
-  }
-
-  return filteredTransactions
-})
-
-const totalPages = computed(() => {
-  return Math.ceil(sortedTransactions.value.length / itemsPerPage.value)
-})
-
-const sortBy = (field) => {
-  if (field === sortByField.value) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortByField.value = field
-    sortDirection.value = 'asc'
+const paramKey = (key) => params[key]
+const handleSort = () => {
+  switch (paramKey('sortBy')) {
+    case 'asc':
+      handleRoute('sortBy', 'desc')
+      break
+    case 'desc':
+      handleRoute('sortBy', 'asc')
+      break
+    case undefined:
+      handleRoute('sortBy', 'asc')
   }
 }
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++
-  }
+const { isFetching, error, data } = useFetch(url, {
+  refetch: true
+}).json()
+
+const handleRoute = (field, value) => {
+  params[field] = value
 }
 
-const previousPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--
-  }
-}
+console.log(data.value)
 </script>
