@@ -174,7 +174,7 @@ const handleSort = () => {
       handleRoute('sortBy', 'desc')
       break
     case 'desc':
-      handleRoute('sortBy', 'asc')
+      handleRoute('sortBy', undefined)
       break
     case undefined:
       handleRoute('sortBy', 'asc')
