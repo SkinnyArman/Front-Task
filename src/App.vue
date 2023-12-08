@@ -75,7 +75,16 @@ import { UrlSearchModeEnum } from './enums/SearchModeEnum'
 import type { Filter } from './types/Filter'
 
 const params = useUrlSearchParams(UrlSearchModeEnum.History)
-const query = computed(() => new URLSearchParams(params).toString())
+const query = computed(() => {
+  // Convert params to a format acceptable by URLSearchParams
+  const paramsAsRecord: Record<string, string> = {}
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) {
+      paramsAsRecord[key] = value.toString()
+    }
+  }
+  return new URLSearchParams(paramsAsRecord).toString()
+})
 const url = computed(() => BASE_URL + '?' + query.value)
 
 const { isFetching, data } = useFetch(url, {
