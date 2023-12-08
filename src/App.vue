@@ -62,68 +62,7 @@
         </button>
       </div>
       <div class="relative w-full overflow-auto">
-        <table class="w-full caption-bottom text-sm">
-          <thead class="[&amp;_tr]:border-b">
-            <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-              <th
-                class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0"
-              >
-                User
-              </th>
-              <th
-                class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0"
-              >
-                Date
-              </th>
-              <th
-                class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0"
-              >
-                Ad Title
-              </th>
-              <th
-                class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0"
-              >
-                Ad Field
-              </th>
-              <th
-                class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0"
-              >
-                Old Value
-              </th>
-              <th
-                class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0"
-              >
-                New Value
-              </th>
-            </tr>
-          </thead>
-          <tbody class="[&amp;_tr:last-child]:border-0">
-            <tr
-              v-for="transaction in data.data"
-              :key="transaction.id"
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
-            >
-              <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-                {{ transaction.name }}
-              </td>
-              <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-                {{ transaction.date }}
-              </td>
-              <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-                {{ transaction.title }}
-              </td>
-              <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-                {{ transaction.field }}
-              </td>
-              <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-                {{ transaction.old_value }}
-              </td>
-              <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-                {{ transaction.new_value }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <transaction-table :transactions="data.data"></transaction-table>
       </div>
       <div class="flex justify-between items-center mt-6">
         <button
@@ -178,36 +117,14 @@ import { ref, computed } from 'vue'
 import { useFetch } from '@vueuse/core'
 import { BASE_URL } from './constants'
 import { useUrlSearchParams } from '@vueuse/core'
-
-enum UrlSearchModeEnum {
-  Hash = 'hash',
-  History = 'history'
-}
+import TransactionTable from './components/TransactionTable.vue'
+import { FiltersEnum, SortFilterEnum } from './enums/FiltersEnum'
+import { UrlSearchModeEnum } from './enums/SearchModeEnum'
+import type { Filter } from './types/Filter'
 
 const params = useUrlSearchParams(UrlSearchModeEnum.History)
 const query = computed(() => new URLSearchParams(params).toString())
 const url = computed(() => BASE_URL + '?' + query.value)
-
-enum FiltersEnum {
-  Sort = 'sortBy',
-  Name = 'name',
-  Title = 'title',
-  StartDate = 'startDate',
-  EndDate = 'endDate',
-  Page = 'page'
-}
-enum SortFilterEnum {
-  ASC = 'asc',
-  DESC = 'desc'
-}
-type FiltersType = {
-  [FiltersEnum.Sort]?: SortFilterEnum
-  [FiltersEnum.Name]?: string
-  [FiltersEnum.Title]?: string
-  [FiltersEnum.StartDate]?: string
-  [FiltersEnum.EndDate]?: string
-  [FiltersEnum.Page]?: number
-}
 
 const paramKey = (key: FiltersEnum) => params[key]
 const handleSort = () => {
@@ -222,11 +139,11 @@ const handleSort = () => {
   handleRoute(FiltersEnum.Sort, nextSort)
 }
 
-const { isFetching, error, data } = useFetch(url, {
+const { isFetching, data } = useFetch(url, {
   refetch: true
 }).json()
 
-const handleRoute = <K extends keyof FiltersType>(field: K, value: FiltersType[K]) => {
+const handleRoute = <K extends keyof Filter>(field: K, value: Filter[K]) => {
   if (value === undefined) {
     delete params[field] // Remove the parameter if value is undefined
   } else {
