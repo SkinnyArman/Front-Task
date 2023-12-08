@@ -4,29 +4,38 @@
       <h3 class="text-2xl font-semibold leading-none tracking-tight">Transaction History</h3>
     </div>
     <div class="p-6">
-      <div class="flex justify-between items-center mb-4">
-        <date-input
-          :value="paramKey(FiltersEnum.StartDate)"
-          @change="handleRoute(FiltersEnum.StartDate, $event)"
-        ></date-input>
-        <date-input
-          :value="paramKey(FiltersEnum.EndDate)"
-          @change="handleRoute(FiltersEnum.EndDate, $event)"
-        ></date-input>
-        <search-input
-          placeholder="Filter by name"
-          :value="paramKey(FiltersEnum.Name)"
-          @enter="handleRoute(FiltersEnum.Name, $event)"
-        ></search-input>
-        <search-input
-          placeholder="Filter by title"
-          :value="paramKey(FiltersEnum.Title)"
-          @enter="handleRoute(FiltersEnum.Title, $event)"
-        ></search-input>
-        <sort-button
-          :sort-state="paramKey(FiltersEnum.Sort) as SortFilterEnum"
-          @handleSort="handleSort"
-        ></sort-button>
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex">
+          <search-input
+            class="mr-6"
+            placeholder="Search by name"
+            :value="paramKey(FiltersEnum.Name)"
+            @enter="handleRoute(FiltersEnum.Name, $event)"
+          ></search-input>
+          <search-input
+            class="mr-6"
+            placeholder="Search by title"
+            :value="paramKey(FiltersEnum.Title)"
+            @enter="handleRoute(FiltersEnum.Title, $event)"
+          ></search-input>
+          <sort-button
+            :sort-state="paramKey(FiltersEnum.Sort) as SortFilterEnum"
+            @handleSort="handleSort"
+          ></sort-button>
+        </div>
+        <div class="flex justify-end items-center w-full">
+          <span class="font-medium text-muted-foreground mr-2">From:</span>
+          <date-input
+            class="mr-6"
+            :value="paramKey(FiltersEnum.StartDate)"
+            @change="handleRoute(FiltersEnum.StartDate, $event)"
+          ></date-input>
+          <span class="font-medium text-muted-foreground mr-2">To:</span>
+          <date-input
+            :value="paramKey(FiltersEnum.EndDate)"
+            @change="handleRoute(FiltersEnum.EndDate, $event)"
+          ></date-input>
+        </div>
       </div>
       <svg-loader v-if="isFetching"></svg-loader>
       <div v-else class="relative w-full overflow-auto">
