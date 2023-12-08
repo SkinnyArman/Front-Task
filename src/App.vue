@@ -9,8 +9,8 @@
           class="flex h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg shadow-lg w-1/4"
           placeholder="Date From"
           type="date"
-          :value="paramKey('startDate')"
-          @change="handleRoute('startDate', $event.target.value)"
+          :value="paramKey(FiltersEnum.StartDate)"
+          @change="handleRoute(FiltersEnum.StartDate, $event.target?.value)"
         />
 
         <!-- Date To Input -->
@@ -18,22 +18,22 @@
           class="flex h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg shadow-lg w-1/4"
           placeholder="Date To"
           type="date"
-          :value="paramKey('endDate')"
-          @change="handleRoute('endDate', $event.target.value)"
+          :value="paramKey(FiltersEnum.EndDate)"
+          @change="handleRoute(FiltersEnum.EndDate, $event.target?.value)"
         />
         <input
-          class="flex h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg shadow-lg w-1/3"
+          class="flex h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg shadow-lg"
           placeholder="Filter by name"
           type="search"
-          :value="paramKey('name')"
-          @keydown.enter="handleRoute('name', $event.target.value)"
+          :value="paramKey(FiltersEnum.Name)"
+          @keydown.enter="handleRoute(FiltersEnum.Name, $event.target?.value)"
         />
         <input
-          class="flex h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg shadow-lg w-1/3"
+          class="flex h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg shadow-lg"
           placeholder="Filter by title"
           type="search"
-          :value="paramKey('title')"
-          @keydown.enter="handleRoute('title', $event.target.value)"
+          :value="paramKey(FiltersEnum.Title)"
+          @keydown.enter="handleRoute(FiltersEnum.Title, $event.target?.value)"
         />
         <button
           class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 ml-4"
@@ -128,8 +128,8 @@
       <div class="flex justify-between items-center mt-6">
         <button
           class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mr-2"
-          @click="previousPage"
-          :disabled="currentPage === 1"
+          @click="handleRoute(FiltersEnum.Page, data.page - 1)"
+          :disabled="data.page === 1"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -149,8 +149,8 @@
         </button>
         <button
           class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-          @click="handleRoute('page', data.page + 1)"
-          :disabled="currentPage === totalPages"
+          @click="handleRoute(FiltersEnum.Page, data.page + 1)"
+          :disabled="data.page === data.totalPages"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -173,37 +173,64 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useFetch } from '@vueuse/core'
 import { BASE_URL } from './constants'
 import { useUrlSearchParams } from '@vueuse/core'
 
-const params = useUrlSearchParams('history')
+enum UrlSearchModeEnum {
+  Hash = 'hash',
+  History = 'history'
+}
+
+const params = useUrlSearchParams(UrlSearchModeEnum.History)
 const query = computed(() => new URLSearchParams(params).toString())
 const url = computed(() => BASE_URL + '?' + query.value)
 
-const paramKey = (key) => params[key]
+enum FiltersEnum {
+  Sort = 'sortBy',
+  Name = 'name',
+  Title = 'title',
+  StartDate = 'startDate',
+  EndDate = 'endDate',
+  Page = 'page'
+}
+enum SortFilterEnum {
+  ASC = 'asc',
+  DESC = 'desc'
+}
+type FiltersType = {
+  [FiltersEnum.Sort]?: SortFilterEnum
+  [FiltersEnum.Name]?: string
+  [FiltersEnum.Title]?: string
+  [FiltersEnum.StartDate]?: string
+  [FiltersEnum.EndDate]?: string
+  [FiltersEnum.Page]?: number
+}
+
+const paramKey = (key: FiltersEnum) => params[key]
 const handleSort = () => {
-  switch (paramKey('sortBy')) {
-    case 'asc':
-      handleRoute('sortBy', 'desc')
-      break
-    case 'desc':
-      handleRoute('sortBy', undefined)
-      break
-    case undefined:
-      handleRoute('sortBy', 'asc')
-  }
+  const currentSort = paramKey(FiltersEnum.Sort)
+  const nextSort =
+    currentSort === SortFilterEnum.ASC
+      ? SortFilterEnum.DESC
+      : currentSort === SortFilterEnum.DESC
+        ? undefined
+        : SortFilterEnum.ASC
+
+  handleRoute(FiltersEnum.Sort, nextSort)
 }
 
 const { isFetching, error, data } = useFetch(url, {
   refetch: true
 }).json()
 
-const handleRoute = (field, value) => {
-  params[field] = value
+const handleRoute = <K extends keyof FiltersType>(field: K, value: FiltersType[K]) => {
+  if (value === undefined) {
+    delete params[field] // Remove the parameter if value is undefined
+  } else {
+    params[field] = typeof value === 'number' ? value.toString() : value
+  }
 }
-
-console.log(data.value)
 </script>
