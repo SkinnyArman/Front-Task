@@ -6,6 +6,22 @@
     <div class="p-6" v-if="!isFetching">
       <div class="flex justify-between items-center mb-4">
         <input
+          class="flex h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg shadow-lg w-1/4"
+          placeholder="Date From"
+          type="date"
+          :value="paramKey('startDate')"
+          @change="handleRoute('startDate', $event.target.value)"
+        />
+
+        <!-- Date To Input -->
+        <input
+          class="flex h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg shadow-lg w-1/4"
+          placeholder="Date To"
+          type="date"
+          :value="paramKey('endDate')"
+          @change="handleRoute('endDate', $event.target.value)"
+        />
+        <input
           class="flex h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg shadow-lg w-1/3"
           placeholder="Filter by name"
           type="search"
